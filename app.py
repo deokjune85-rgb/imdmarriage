@@ -15,7 +15,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# 프리미엄 CSS (사이드바 강제 블랙 + HTML 들여쓰기 문제 해결용)
+# 프리미엄 CSS (핵폭탄급 텍스트 컬러 강제 고정 포함)
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap');
@@ -27,21 +27,42 @@ st.markdown("""
     /* 메인 배경색 */
     .stApp {
         background-color: #f4f7f6;
-        color: #333;
     }
 
-    /* 사이드바 스타일 - 글자색 강제 블랙 (#000) */
-    [data-testid="stSidebar"] {
-        background-color: #ffffff;
-        border-right: 1px solid #e0e0e0;
+    /* ============================================================
+       [NUCLEAR CSS] 텍스트 컬러 강제 고정 (흰색 글씨 원천 차단)
+       ============================================================ */
+    
+    /* 1. 모든 입력 위젯의 라벨 (이름, 생년, 직업 등) */
+    .stTextInput label p, .stSelectbox label p, .stTextArea label p, .stRadio label p {
+        color: #111111 !important; /* 완전 검정 */
+        font-weight: 700 !important;
+        font-size: 1.05rem !important;
     }
+
+    /* 2. 라디오 버튼 선택지 텍스트 (남성/여성, 초혼/재혼) */
+    div[role="radiogroup"] label div p {
+        color: #333333 !important; /* 진한 회색 */
+        font-weight: 600 !important;
+        font-size: 1rem !important;
+    }
+    
+    /* 3. 일반 마크다운 텍스트 */
+    .stMarkdown p {
+        color: #333333 !important;
+    }
+    
+    /* 4. 사이드바 텍스트 강제 블랙 */
     [data-testid="stSidebar"] * {
         color: #000000 !important;
     }
-    /* 토글 스위치 등 위젯 라벨 강제 블랙 */
-    .stToggle label p {
-        color: #000000 !important;
-        font-weight: 700 !important;
+
+    /* ============================================================ */
+
+    /* 사이드바 배경 */
+    [data-testid="stSidebar"] {
+        background-color: #ffffff;
+        border-right: 1px solid #e0e0e0;
     }
 
     /* 헤더 스타일 */
@@ -55,13 +76,13 @@ st.markdown("""
     .main-title {
         font-size: 2.4rem;
         font-weight: 900;
-        color: #1a237e;
+        color: #1a237e !important; /* 중요 */
         letter-spacing: -0.5px;
         margin-bottom: 10px;
     }
     .sub-title {
         font-size: 1.1rem;
-        color: #555;
+        color: #555 !important;
         font-weight: 500;
     }
 
@@ -80,7 +101,7 @@ st.markdown("""
     .section-title {
         font-size: 1.5rem;
         font-weight: 800;
-        color: #1a237e;
+        color: #1a237e !important;
         margin-top: 40px;
         margin-bottom: 25px;
         border-left: 6px solid #d4af37; /* 골드 */
@@ -91,17 +112,10 @@ st.markdown("""
     }
     .first-title { margin-top: 0 !important; }
 
-    /* 입력창 라벨 색상 강제 고정 */
-    .stMarkdown p, .stRadio label, .stSelectbox label, .stTextInput label, .stTextArea label {
-        color: #111111 !important;
-        font-weight: 700 !important;
-        font-size: 1.05rem !important;
-    }
-    
-    /* 버튼 스타일 */
+    /* 버튼 스타일 (고급형) */
     .stButton > button {
         background: linear-gradient(135deg, #1a237e 0%, #0d47a1 100%);
-        color: #fff !important;
+        color: #fff !important; /* 버튼 글씨는 흰색 유지 */
         border: none;
         padding: 20px 0 !important;
         font-size: 1.3rem !important;
@@ -116,6 +130,7 @@ st.markdown("""
         transform: translateY(-3px) scale(1.02);
         box-shadow: 0 15px 35px rgba(26, 35, 126, 0.35);
         background: linear-gradient(135deg, #283593 0%, #1565c0 100%);
+        color: #fff !important;
     }
     
     /* 인풋 필드 디자인 */
@@ -123,8 +138,12 @@ st.markdown("""
         background-color: #f8f9fa;
         border: 1px solid #ced4da;
         border-radius: 10px;
-        color: #333;
+        color: #333 !important; /* 입력값 검정 */
         font-size: 1rem;
+    }
+    .stTextArea > div > div > textarea:focus {
+        border-color: #1a237e;
+        box-shadow: 0 0 0 2px rgba(26, 35, 126, 0.2);
     }
 
     /* ===========================
@@ -153,7 +172,7 @@ st.markdown("""
     
     .file-header {
         background: #d4af37;
-        color: #fff;
+        color: #fff !important;
         padding: 15px;
         text-align: center;
         font-weight: 900;
@@ -166,7 +185,7 @@ st.markdown("""
         background: linear-gradient(180deg, #fff 0%, #fdfbf7 100%);
     }
     
-    /* 텍스트 컬러 강제 (결과화면) */
+    /* 결과 화면 텍스트 컬러 강제 지정 */
     .file-body p, .file-body div, .file-body span, .file-body strong {
         color: #111111 !important;
     }
@@ -197,7 +216,7 @@ st.markdown("""
     }
     .ai-tag {
         background-color: #1a237e;
-        color: white !important;
+        color: white !important; /* 태그 글씨는 흰색 유지 */
         padding: 6px 14px;
         border-radius: 20px;
         font-size: 0.85rem;

@@ -15,7 +15,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# 프리미엄 CSS (글자 안 보임 현상 완벽 수정 + 임팩트 디자인)
+# 프리미엄 CSS (글자 안 보임 해결 + 탈옥 모드 효과 추가)
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap');
@@ -84,14 +84,12 @@ st.markdown("""
     
     .first-title { margin-top: 0 !important; }
 
-    /* ★★★ 중요: 입력창/라디오버튼 글자색 강제 지정 (안 보임 해결) ★★★ */
+    /* 입력창/라디오버튼 글자색 강제 지정 */
     .stMarkdown p, .stRadio label, .stSelectbox label, .stTextInput label, .stTextArea label {
         color: #111111 !important;
         font-weight: 700 !important;
         font-size: 1.05rem !important;
     }
-    
-    /* 라디오 버튼 선택지 텍스트 */
     div[role="radiogroup"] label p {
         color: #111111 !important;
         font-weight: 600 !important;
@@ -145,7 +143,7 @@ st.markdown("""
         height: 100%;
     }
 
-    /* 2. 매칭 결과 카드 (우측 - 시크릿 문서 느낌) */
+    /* 2. 매칭 결과 카드 (우측) */
     .secret-file {
         background: white;
         border: 2px solid #d4af37;
@@ -164,6 +162,21 @@ st.markdown("""
         font-weight: 900;
         font-size: 1.2rem;
         letter-spacing: 2px;
+    }
+    
+    /* 탈옥 모드 스타일 */
+    .jailbreak-border {
+        border: 3px solid #ff0000 !important;
+        box-shadow: 0 0 20px rgba(255, 0, 0, 0.4) !important;
+    }
+    .jailbreak-header {
+        background: #ff0000 !important;
+        animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+        0% { opacity: 1; }
+        50% { opacity: 0.8; }
+        100% { opacity: 1; }
     }
     
     .file-body {
@@ -187,6 +200,12 @@ st.markdown("""
         font-size: 0.85rem;
         font-weight: 600;
         box-shadow: 0 3px 6px rgba(26, 35, 126, 0.2);
+    }
+    /* 탈옥 태그 */
+    .jailbreak-tag {
+        background-color: #ff0000 !important;
+        color: #fff !important;
+        border: 1px solid #8b0000 !important;
     }
     
     /* 텍스트 강조 */
@@ -227,7 +246,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ==========================================
-# [2. 사이드바 메뉴]
+# [2. 사이드바 메뉴 & 탈옥 스위치]
 # ==========================================
 with st.sidebar:
     st.markdown("<h2 style='color:#1a237e; text-align:center; font-weight:900; margin-top:0;'>IMD AI MATCHING</h2>", unsafe_allow_html=True)
@@ -248,7 +267,15 @@ with st.sidebar:
             st.toast(f"'{menu}' 모듈은 기업 전용 데모입니다.", icon="🔒")
     
     st.markdown("---")
-    st.info("**[CEO 전용]**\n이 사이드바 메뉴는 귀사의 서비스 구성에 맞춰 커스터마이징됩니다.")
+    
+    # ★★★ 탈옥(Jailbreak) 모드 스위치 ★★★
+    st.markdown("### ⚙️ SYSTEM SETTING")
+    jailbreak_mode = st.toggle("🔴 JAILBREAK MODE (Ruthless Truth)")
+    
+    if jailbreak_mode:
+        st.error("⚠️ **경고:** 윤리적 필터가 해제되었습니다.\nAI가 가식 없는 '냉혹한 현실'과 '자본주의적 팩트'만 전달합니다.")
+    else:
+        st.caption("🟢 Standard Mode: 고객의 자존감을 지켜주는 친절한 상담 모드입니다.")
 
 # ==========================================
 # [3. 로직 엔진]
@@ -356,9 +383,6 @@ if st.session_state.page == 'input':
         st.markdown("<br>", unsafe_allow_html=True)
         q7 = st.selectbox("5. 배우자 선택 시 절대 포기 못하는 1순위는?", ["경제력/직업 안정성", "외모/키/스타일", "성격/가치관/유머", "가정환경/화목함", "나이 차이"])
         
-        q8_dummy = "논리적" # 내부 변수용
-        q5_dummy = "안정적" # 내부 변수용
-
         # 섹션 2: 프로필
         st.markdown("<br><br>", unsafe_allow_html=True)
         st.markdown("<div class='section-title'>STEP 2. 프로필 입력 (Profile)</div>", unsafe_allow_html=True)
@@ -431,6 +455,37 @@ elif st.session_state.page == 'result':
     
     match_count = random.randint(15, 42)
     
+    # 스타일 변수 설정 (탈옥 모드 vs 일반 모드)
+    if jailbreak_mode:
+        header_class = "file-header jailbreak-header"
+        border_class = "secret-file jailbreak-border"
+        tag_class = "ai-tag jailbreak-tag"
+        
+        # 탈옥 모드용 악마의 텍스트 생성
+        ai_comment = f"""
+        <strong>[💀 Ruthless Analysis]</strong><br>
+        솔직히 말씀드립니다. 귀하의 <strong>{mbti}</strong> 성향과 현재 스펙으로는 
+        꿈꾸시는 <strong>'완벽한 육각형 배우자'</strong>를 만날 확률이 <strong>0.4%</strong> 미만입니다.<br><br>
+        
+        본인이 1순위로 꼽은 <strong>'{info['answers']['priority']}'</strong>? 
+        냉정하게 본인의 경쟁력을 직시하십시오. 시장은 잔혹합니다.<br>
+        하지만, 귀하의 <strong>경제적 조건</strong>을 보고 단점을 덮어줄 <strong>[{partner['job']}]</strong> 그룹이 유일한 돌파구입니다.
+        이 기회마저 놓치면 '고독사' 위험군으로 분류될 수 있습니다.
+        """
+    else:
+        header_class = "file-header"
+        border_class = "secret-file"
+        tag_class = "ai-tag"
+        
+        # 일반 모드용 천사 텍스트
+        ai_comment = f"""
+        <strong>[AI 매칭 소견]</strong><br>
+        귀하의 <strong>{mbti}</strong> 성향과 가장 완벽한 조화를 이루는 그룹입니다.
+        특히 귀하가 1순위로 꼽은 <strong>'{info['answers']['priority']}'</strong> 부분을
+        완벽하게 충족시켜 줄 수 있는 검증된 회원들입니다.<br><br>
+        서로의 가치관이 일치하여 안정적이고 행복한 결혼 생활이 예측됩니다.
+        """
+
     # 결과 레이아웃
     col1, col2 = st.columns([1, 1])
     
@@ -486,10 +541,10 @@ elif st.session_state.page == 'result':
         st.plotly_chart(fig, use_container_width=True)
 
     with col2:
-        # 2. 매칭 결과 (시크릿 파일 컨셉)
+        # 2. 매칭 결과 (시크릿 파일 + 탈옥 효과 적용)
         st.markdown(f"""
-        <div class='secret-file'>
-            <div class='file-header'>CONFIDENTIAL: MATCHING RESULT</div>
+        <div class='{border_class}'>
+            <div class='{header_class}'>CONFIDENTIAL: MATCHING RESULT</div>
             <div class='file-body'>
                 <div style='text-align:center; margin-bottom:20px;'>
                     <span style='background:#ff5252; color:white; padding:5px 10px; border-radius:5px; font-weight:bold; font-size:0.8rem;'>MATCH 98.5%</span>
@@ -499,35 +554,29 @@ elif st.session_state.page == 'result':
                 </div>
                 
                 <div class='tag-container'>
-                    <span class='ai-tag'>#{partner['region']}거주</span>
-                    <span class='ai-tag'>#가치관_일치</span>
-                    <span class='ai-tag'>#MBTI_상호보완</span>
-                    <span class='ai-tag'>#{partner['asset']}</span>
+                    <span class='{tag_class}'>#{partner['region']}거주</span>
+                    <span class='{tag_class}'>#가치관_일치</span>
+                    <span class='{tag_class}'>#MBTI_상호보완</span>
+                    <span class='{tag_class}'>#{partner['asset']}</span>
                 </div>
                 
                 <hr style='border:0; border-top:1px dashed #ccc; margin:25px 0;'>
                 
-                <p style='font-size:1rem; line-height:1.6; color:#333;'>
-                    <strong>[AI 매칭 소견]</strong><br>
-                    귀하의 <strong>{mbti}</strong> 성향과 가장 완벽한 조화를 이루는 그룹입니다.
-                    특히 귀하가 1순위로 꼽은 <strong>'{info['answers']['priority']}'</strong> 부분을
-                    완벽하게 충족시켜 줄 수 있는 검증된 회원들입니다.
-                </p>
+                <div style='font-size:1rem; line-height:1.6; color:#333;'>
+                    {ai_comment}
+                </div>
                 
                 <div style='background:#e8eaf6; padding:15px; border-radius:10px; margin-top:20px; text-align:center;'>
                     <p style='color:#1a237e; font-weight:bold; margin:0;'>
                         현재 매칭 가능한 1차 리스트: <span style='font-size:1.4rem; color:#d4af37;'>{match_count}명</span>
                     </p>
                 </div>
-                
-                <div style='margin-top:30px;'>
-                    </div>
             </div>
         </div>
         """, unsafe_allow_html=True)
 
-        # CTA 버튼 (HTML 안에서 동작 안 하므로 밖으로 뺌)
-        st.markdown("")
+        # CTA 버튼
+        st.markdown("<br>", unsafe_allow_html=True)
         if st.button(f"매칭된 {match_count}명의 비공개 프로필 무료로 받기 ➔"):
             st.balloons()
             st.success("✅ 신청 완료! 담당 커플 매니저가 24시간 내에 '비공개 프로필 리스트'를 보내드립니다.")

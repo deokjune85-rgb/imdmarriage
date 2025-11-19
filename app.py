@@ -84,12 +84,14 @@ st.markdown("""
     
     .first-title { margin-top: 0 !important; }
 
-    /* 입력창/라디오버튼 글자색 강제 지정 */
+    /* ★★★ 중요: 입력창/라디오버튼 글자색 강제 지정 (안 보임 해결) ★★★ */
     .stMarkdown p, .stRadio label, .stSelectbox label, .stTextInput label, .stTextArea label {
         color: #111111 !important;
         font-weight: 700 !important;
         font-size: 1.05rem !important;
     }
+    
+    /* 라디오 버튼 선택지 텍스트 */
     div[role="radiogroup"] label p {
         color: #111111 !important;
         font-weight: 600 !important;
@@ -269,13 +271,13 @@ with st.sidebar:
     st.markdown("---")
     
     # ★★★ 탈옥(Jailbreak) 모드 스위치 ★★★
-    st.markdown("### ⚙️ SYSTEM SETTING")
-    jailbreak_mode = st.toggle("🔴 JAILBREAK MODE (Ruthless Truth)")
+    st.markdown("### ⚙️ ADMIN MODE")
+    jailbreak_mode = st.toggle("⛔ 남들이 보면 안돼: 팩트폭격모드")
     
     if jailbreak_mode:
-        st.error("⚠️ **경고:** 윤리적 필터가 해제되었습니다.\nAI가 가식 없는 '냉혹한 현실'과 '자본주의적 팩트'만 전달합니다.")
+        st.error("⚠️ **경고:** AI의 윤리적 위로 기능이 차단되었습니다.\n고객의 자산 가치와 현실적 등급을 냉혹하게 계산합니다.")
     else:
-        st.caption("🟢 Standard Mode: 고객의 자존감을 지켜주는 친절한 상담 모드입니다.")
+        st.caption("🟢 Standard Mode: 상담 성공률을 높이는 공감형 모드입니다.")
 
 # ==========================================
 # [3. 로직 엔진]
@@ -461,9 +463,9 @@ elif st.session_state.page == 'result':
         border_class = "secret-file jailbreak-border"
         tag_class = "ai-tag jailbreak-tag"
         
-        # 탈옥 모드용 악마의 텍스트 생성
+        # 탈옥 모드용 악마의 텍스트 생성 (강렬한 팩폭)
         ai_comment = f"""
-        <strong>[💀 Ruthless Analysis]</strong><br>
+        <strong>[💀 RUTHLESS TRUTH]</strong><br>
         솔직히 말씀드립니다. 귀하의 <strong>{mbti}</strong> 성향과 현재 스펙으로는 
         꿈꾸시는 <strong>'완벽한 육각형 배우자'</strong>를 만날 확률이 <strong>0.4%</strong> 미만입니다.<br><br>
         
@@ -542,6 +544,7 @@ elif st.session_state.page == 'result':
 
     with col2:
         # 2. 매칭 결과 (시크릿 파일 + 탈옥 효과 적용)
+        # ★★★ HTML 코드 노출 수정 완료 (변수로 텍스트 처리) ★★★
         st.markdown(f"""
         <div class='{border_class}'>
             <div class='{header_class}'>CONFIDENTIAL: MATCHING RESULT</div>

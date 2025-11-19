@@ -15,7 +15,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# 프리미엄 CSS (글자 안 보임 해결 + 탈옥 모드 효과 추가)
+# 프리미엄 CSS (텍스트 컬러 완벽 수정 버전)
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap');
@@ -84,15 +84,15 @@ st.markdown("""
     
     .first-title { margin-top: 0 !important; }
 
-    /* ★★★ 중요: 입력창/라디오버튼 글자색 강제 지정 (안 보임 해결) ★★★ */
+    /* ★★★ 텍스트 컬러 강제 고정 (모든 입력창 라벨) ★★★ */
     .stMarkdown p, .stRadio label, .stSelectbox label, .stTextInput label, .stTextArea label {
         color: #111111 !important;
         font-weight: 700 !important;
         font-size: 1.05rem !important;
     }
     
-    /* 라디오 버튼 선택지 텍스트 */
-    div[role="radiogroup"] label p {
+    /* 라디오 버튼 및 토글 스위치 텍스트 */
+    div[role="radiogroup"] label p, .stToggle p {
         color: #111111 !important;
         font-weight: 600 !important;
         font-size: 1rem !important;
@@ -166,24 +166,33 @@ st.markdown("""
         letter-spacing: 2px;
     }
     
+    .file-body {
+        padding: 30px;
+        background: linear-gradient(180deg, #fff 0%, #fdfbf7 100%);
+    }
+    
+    /* ★★★ 결과 화면 텍스트 컬러 강제 지정 (흰색 글자 방지) ★★★ */
+    .file-body p, .file-body div, .file-body span, .file-body strong {
+        color: #111111 !important;
+    }
+    .bot-msg strong, .bot-msg span, .bot-msg div {
+        color: #111111 !important;
+    }
+
     /* 탈옥 모드 스타일 */
     .jailbreak-border {
-        border: 3px solid #ff0000 !important;
-        box-shadow: 0 0 20px rgba(255, 0, 0, 0.4) !important;
+        border: 4px solid #ff0000 !important;
+        box-shadow: 0 0 25px rgba(255, 0, 0, 0.3) !important;
     }
     .jailbreak-header {
         background: #ff0000 !important;
+        color: #fff !important;
         animation: pulse 2s infinite;
     }
     @keyframes pulse {
         0% { opacity: 1; }
         50% { opacity: 0.8; }
         100% { opacity: 1; }
-    }
-    
-    .file-body {
-        padding: 30px;
-        background: linear-gradient(180deg, #fff 0%, #fdfbf7 100%);
     }
 
     /* 태그 스타일 */
@@ -196,7 +205,7 @@ st.markdown("""
     }
     .ai-tag {
         background-color: #1a237e;
-        color: white;
+        color: white !important; /* 태그 글씨는 흰색 유지 */
         padding: 6px 14px;
         border-radius: 20px;
         font-size: 0.85rem;
@@ -215,7 +224,7 @@ st.markdown("""
         background: linear-gradient(120deg, #fff176 0%, #ffd54f 100%);
         padding: 0 5px;
         font-weight: bold;
-        color: #000;
+        color: #000 !important;
     }
     
     /* 점수판 */
@@ -234,11 +243,11 @@ st.markdown("""
     .score-num {
         font-size: 1.8rem;
         font-weight: 900;
-        color: #1a237e;
+        color: #1a237e !important;
     }
     .score-label {
         font-size: 0.8rem;
-        color: #666;
+        color: #666 !important;
         text-transform: uppercase;
     }
 
@@ -272,10 +281,10 @@ with st.sidebar:
     
     # ★★★ 탈옥(Jailbreak) 모드 스위치 ★★★
     st.markdown("### ⚙️ ADMIN MODE")
-    jailbreak_mode = st.toggle("⛔ 남들이 보면 안돼: 팩트폭격모드")
+    jailbreak_mode = st.toggle("⛔ 팩트폭격모드")
     
     if jailbreak_mode:
-        st.error("⚠️ **경고:** AI의 윤리적 위로 기능이 차단되었습니다.\n고객의 자산 가치와 현실적 등급을 냉혹하게 계산합니다.")
+        st.error("⚠️ **경고:** AI의 윤리적 필터가 해제되었습니다.\n자본주의적 관점의 냉혹한 등급을 산출합니다.")
     else:
         st.caption("🟢 Standard Mode: 상담 성공률을 높이는 공감형 모드입니다.")
 
@@ -463,8 +472,8 @@ elif st.session_state.page == 'result':
         border_class = "secret-file jailbreak-border"
         tag_class = "ai-tag jailbreak-tag"
         
-        # 탈옥 모드용 악마의 텍스트 생성 (강렬한 팩폭)
-        ai_comment = f"""
+        # 탈옥 모드용 악마의 텍스트 (흰색 글자 문제 해결됨)
+        ai_comment_text = f"""
         <strong>[💀 RUTHLESS TRUTH]</strong><br>
         솔직히 말씀드립니다. 귀하의 <strong>{mbti}</strong> 성향과 현재 스펙으로는 
         꿈꾸시는 <strong>'완벽한 육각형 배우자'</strong>를 만날 확률이 <strong>0.4%</strong> 미만입니다.<br><br>
@@ -479,8 +488,8 @@ elif st.session_state.page == 'result':
         border_class = "secret-file"
         tag_class = "ai-tag"
         
-        # 일반 모드용 천사 텍스트
-        ai_comment = f"""
+        # 일반 모드용 천사 텍스트 (흰색 글자 문제 해결됨)
+        ai_comment_text = f"""
         <strong>[AI 매칭 소견]</strong><br>
         귀하의 <strong>{mbti}</strong> 성향과 가장 완벽한 조화를 이루는 그룹입니다.
         특히 귀하가 1순위로 꼽은 <strong>'{info['answers']['priority']}'</strong> 부분을
@@ -515,7 +524,7 @@ elif st.session_state.page == 'result':
             <p><strong>👁️ AI가 발견한 내면의 욕망:</strong><br>
             <span class='highlight-text'>"{desire}"</span></p>
             <br>
-            <div style='background:#f8f9fa; padding:15px; border-radius:10px; border:1px solid #eee; font-size:0.9rem; line-height:1.6;'>
+            <div style='background:#f8f9fa; padding:15px; border-radius:10px; border:1px solid #eee; font-size:0.9rem; line-height:1.6; color:#333;'>
                 귀하는 <strong>{keywords[0].replace('#','')}</strong> 성향이 강하며, 
                 단순한 조건 만남보다는 <strong>{info['answers']['priority']}</strong> 코드가 맞는 사람과 만났을 때 
                 성혼 확률이 <strong>3.8배</strong> 상승합니다.
@@ -543,8 +552,7 @@ elif st.session_state.page == 'result':
         st.plotly_chart(fig, use_container_width=True)
 
     with col2:
-        # 2. 매칭 결과 (시크릿 파일 + 탈옥 효과 적용)
-        # ★★★ HTML 코드 노출 수정 완료 (변수로 텍스트 처리) ★★★
+        # 2. 매칭 결과 (HTML 코드 노출 해결 & 글자색 강제 지정)
         st.markdown(f"""
         <div class='{border_class}'>
             <div class='{header_class}'>CONFIDENTIAL: MATCHING RESULT</div>
@@ -566,7 +574,7 @@ elif st.session_state.page == 'result':
                 <hr style='border:0; border-top:1px dashed #ccc; margin:25px 0;'>
                 
                 <div style='font-size:1rem; line-height:1.6; color:#333;'>
-                    {ai_comment}
+                    {ai_comment_text}
                 </div>
                 
                 <div style='background:#e8eaf6; padding:15px; border-radius:10px; margin-top:20px; text-align:center;'>

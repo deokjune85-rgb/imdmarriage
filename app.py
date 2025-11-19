@@ -3,6 +3,7 @@ import plotly.graph_objects as go
 import time
 import random
 import datetime
+import re
 
 # ==========================================
 # [1. 시스템 설정 및 디자인]
@@ -14,7 +15,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# 프리미엄 CSS (수정본: 텍스트 컬러 강제 지정 & 버튼 확대)
+# 프리미엄 CSS (입력창 라벨 색상 강제 수정 포함)
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap');
@@ -77,26 +78,25 @@ st.markdown("""
         display: inline-block;
     }
 
-    /* ★ 중요 수정: 입력창 라벨 텍스트 색상 강제 변경 (안보임 해결) ★ */
-    .stMarkdown p, .stRadio label, .stSelectbox label, .stTextInput label {
-        color: #333333 !important; /* 진한 회색으로 강제 */
+    /* 입력창 라벨 텍스트 색상 강제 변경 */
+    .stMarkdown p, .stRadio label, .stSelectbox label, .stTextInput label, .stTextArea label {
+        color: #333333 !important;
         font-weight: 600 !important;
         font-size: 0.95rem !important;
     }
     
-    /* 라디오 버튼 텍스트 색상 */
     div[role="radiogroup"] label p {
         color: #333333 !important;
         font-weight: 500 !important;
     }
 
-    /* 버튼 스타일 대폭 수정 (박스 크기 확대) */
+    /* 버튼 스타일 */
     .stButton > button {
         background: linear-gradient(135deg, #1a237e 0%, #0d47a1 100%);
         color: #fff !important;
         border: none;
-        padding: 20px 0 !important; /* 높이 키움 */
-        font-size: 1.3rem !important; /* 글자 키움 */
+        padding: 20px 0 !important;
+        font-size: 1.3rem !important;
         font-weight: 800 !important;
         border-radius: 12px !important;
         width: 100%;
@@ -111,13 +111,7 @@ st.markdown("""
     }
     
     /* 인풋 필드 디자인 */
-    .stSelectbox > div > div {
-        background-color: #f8f9fa;
-        border: 1px solid #ddd;
-        border-radius: 8px;
-        color: #333;
-    }
-    .stTextInput > div > div > input {
+    .stSelectbox > div > div, .stTextInput > div > div > input, .stTextArea > div > div > textarea {
         background-color: #f8f9fa;
         border: 1px solid #ddd;
         border-radius: 8px;
@@ -134,16 +128,37 @@ st.markdown("""
         box-shadow: 0 10px 30px rgba(0,0,0,0.05);
     }
 
-    /* 챗봇 메시지 */
-    .bot-msg {
-        background-color: #f8f9fa;
+    /* AI 분석 박스 */
+    .ai-insight-box {
+        background-color: #e8eaf6;
         border-left: 4px solid #1a237e;
         padding: 20px;
-        border-radius: 0 10px 10px 0;
-        margin-bottom: 15px;
-        line-height: 1.7;
-        font-size: 1rem;
-        color: #333;
+        border-radius: 8px;
+        margin-bottom: 20px;
+    }
+    .ai-title {
+        color: #1a237e;
+        font-weight: 800;
+        font-size: 1.1rem;
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    /* 키워드 뱃지 */
+    .keyword-badge {
+        display: inline-block;
+        background-color: #fff;
+        color: #1a237e;
+        border: 1px solid #1a237e;
+        padding: 5px 12px;
+        border-radius: 15px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        margin-right: 8px;
+        margin-bottom: 8px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
     }
 </style>
 """, unsafe_allow_html=True)
@@ -152,7 +167,6 @@ st.markdown("""
 # [2. 사이드바 (더미 메뉴)]
 # ==========================================
 with st.sidebar:
-    # 로고 대신 텍스트 로고 사용
     st.markdown("<h2 style='color:#1a237e; text-align:center;'>IMD 결혼정보</h2>", unsafe_allow_html=True)
     st.markdown("---")
     
@@ -183,7 +197,7 @@ with st.sidebar:
 # ==========================================
 
 # 드롭다운 데이터 리스트
-years = [f"{y}년생" for y in range(1950, 2016)]
+years = [f"{y}년생" for y in range(1960, 2005)]
 jobs = [
     "선택해 주세요.", "일반사무직", "기업 임원", "공무원", "전문직(의료)", 
     "전문직(법률)", "전문직(기술)", "자영업", "기업 경영", "프리랜서", "기타"
@@ -194,6 +208,37 @@ educations = [
 regions = [
     "선택해 주세요.", "서울", "경기", "인천", "대전", "대구", "부산", "광주", "울산", "세종", "강원", "충북", "충남", "전북", "전남", "경북", "경남", "제주", "해외"
 ]
+
+# 텍스트 포렌식 분석 함수 (AI 시뮬레이션)
+def analyze_text_forensics(text):
+    """
+    사용자가 입력한 비정형 텍스트를 분석하여 심리/성향을 도출하는 척하는 함수
+    """
+    keywords = []
+    insights = []
+    
+    # 1. 키워드 추출 로직 (시뮬레이션)
+    if len(text) > 50:
+        keywords.append("#진중한_성격")
+    else:
+        keywords.append("#직관적_성격")
+        
+    if any(w in text for w in ['돈', '경제', '연봉', '능력', '일']):
+        keywords.append("#현실주의")
+        insights.append("경제적 가치를 중시하며, 상대방의 비전과 능력을 1순위로 평가하는 경향이 있음.")
+    if any(w in text for w in ['사랑', '배려', '대화', '마음', '가정']):
+        keywords.append("#관계지향")
+        insights.append("정서적 교감과 소통을 중요시하며, 갈등 상황에서 대화로 풀기를 원함.")
+    if any(w in text for w in ['여행', '취미', '운동', '맛집']):
+        keywords.append("#라이프스타일")
+        insights.append("함께 즐길 수 있는 활동적인 파트너를 선호하며, 워라밸을 중시함.")
+    
+    # 기본값이 없을 경우
+    if not keywords:
+        keywords = ["#신중함", "#안정추구"]
+        insights = ["신중하고 차분한 성향으로, 급격한 변화보다는 안정을 추구함."]
+        
+    return keywords, insights
 
 # 세션 상태
 if 'page' not in st.session_state: st.session_state.page = 'input'
@@ -228,7 +273,7 @@ if st.session_state.page == 'input':
         
         col3, col4 = st.columns(2)
         with col3:
-            birth_year = st.selectbox("생년 *", years, index=35) # 1985년생 쯤을 기본으로
+            birth_year = st.selectbox("생년 *", years, index=25) 
         with col4:
             region = st.selectbox("지역 *", regions)
 
@@ -243,36 +288,53 @@ if st.session_state.page == 'input':
         with col6:
             edu = st.selectbox("학력 *", educations)
             
-        # 추가 질문 (심층 매칭용)
+        # 섹션 3: 매칭 선호도
         st.markdown("<br>", unsafe_allow_html=True)
-        st.markdown("<div class='section-title'>03. 매칭 선호도 (선택)</div>", unsafe_allow_html=True)
+        st.markdown("<div class='section-title'>03. 매칭 선호도</div>", unsafe_allow_html=True)
         
         col7, col8 = st.columns(2)
         with col7:
-            priority = st.selectbox("배우자 선택 1순위", ["경제력", "외모/스타일", "성격/가치관", "가정환경", "나이차이"])
+            priority = st.selectbox("배우자 선택 1순위", ["경제력/능력", "외모/스타일", "성격/가치관", "가정환경", "나이차이"])
         with col8:
             style = st.selectbox("선호 데이트 스타일", ["활동적/레저", "정적/문화생활", "맛집탐방/카페", "여행/휴양"])
 
+        # ★ [신규 추가] 섹션 4: AI 텍스트 포렌식 분석 ★
+        st.markdown("<br>", unsafe_allow_html=True)
+        st.markdown("<div class='section-title'>04. 심층 성향 분석 (AI Text Forensics)</div>", unsafe_allow_html=True)
+        st.info("💡 본인의 매력, 이상형, 가치관 등을 자유롭게 서술해 주세요. AI가 문맥을 분석하여 숨겨진 성향을 도출합니다.")
+        
+        self_intro = st.text_area(
+            "자기소개 및 배우자상 (100자 내외 권장)", 
+            height=150, 
+            placeholder="예: 저는 성실함을 가장 중요하게 생각합니다. 주말에는 주로 등산을 가거나..."
+        )
+
         st.markdown("<br><br>", unsafe_allow_html=True)
         
-        # 제출 버튼 (크고 아름답게)
+        # 제출 버튼
         if st.button("✨ AI 정밀 진단 결과보기"):
             if name and job != "선택해 주세요." and edu != "선택해 주세요." and region != "선택해 주세요.":
                 # 데이터 저장
                 st.session_state.user_info = {
                     "name": name, "gender": gender, "year": birth_year,
                     "job": job, "edu": edu, "region": region,
-                    "priority": priority
+                    "priority": priority, "self_intro": self_intro
                 }
                 
-                # 로딩 애니메이션 (전문가 느낌)
-                with st.spinner("IMD 매칭 엔진이 15만 건의 데이터를 분석 중입니다..."):
-                    time.sleep(2) 
+                # 로딩 애니메이션 (전문가 느낌 - 텍스트 분석 과정 보여주기)
+                with st.status("IMD AI 엔진 구동 중...", expanded=True) as status:
+                    st.write("📡 1. 기본 스펙 데이터베이스 대조 중...")
+                    time.sleep(1)
+                    st.write("🧠 2. 텍스트 마이닝(Text Mining) 및 성향 추출 중...")
+                    time.sleep(1.5)
+                    st.write("⚖️ 3. 최적 매칭 그룹 시뮬레이션 중...")
+                    time.sleep(1)
+                    status.update(label="분석 완료!", state="complete", expanded=False)
                 
                 st.session_state.page = 'result'
                 st.rerun()
             else:
-                st.error("정확한 진단을 위해 필수 항목(*)을 모두 선택해 주십시오.")
+                st.error("필수 항목(*)을 모두 입력해 주십시오.")
         
         st.markdown("</div>", unsafe_allow_html=True)
 
@@ -283,8 +345,9 @@ elif st.session_state.page == 'result':
     
     # 가상 분석 로직
     score = random.randint(82, 96)
+    keywords, ai_insights = analyze_text_forensics(info.get('self_intro', ''))
     
-    # 직업군에 따른 티어 설정 (시뮬레이션)
+    # 직업군에 따른 티어 설정
     tier = "노블레스"
     if "전문직" in info['job'] or "임원" in info['job'] or "경영" in info['job']:
         tier = "로얄 블랙"
@@ -299,13 +362,11 @@ elif st.session_state.page == 'result':
     # 차트 생성
     def create_radar():
         categories = ['경제적 안정성', '외모/스타일', '가정환경', '성격/사회성', '매칭 적극성']
-        # 직업과 학력에 따라 점수 차등 (시각적 효과)
-        base_score = 70
-        if "전문직" in info['job']: base_score += 20
-        if "박사" in info['edu']: base_score += 10
+        base_score = 75
+        if "전문직" in info['job']: base_score += 15
         
         values = [
-            min(base_score, 95), 
+            min(base_score + random.randint(-5, 10), 99), 
             random.randint(70, 90), 
             random.randint(75, 95), 
             random.randint(80, 98), 
@@ -360,18 +421,30 @@ elif st.session_state.page == 'result':
         st.plotly_chart(create_radar(), use_container_width=True)
 
     with col2:
-        st.markdown("### 📝 AI 매칭 소견")
+        # ★ AI 포렌식 분석 결과 출력 ★
+        st.markdown("### 🧠 AI 텍스트 포렌식(Forensics)")
+        
+        # 키워드 배지 생성
+        badges_html = "".join([f"<span class='keyword-badge'>{k}</span>" for k in keywords])
+        
         st.markdown(f"""
-        <div class='bot-msg'>
-            <strong>[스펙 분석]</strong><br>
-            귀하의 직업({info['job']})과 학력({info['edu']})을 고려했을 때, 
-            경제적 안정성 및 사회적 지위 항목에서 높은 점수를 기록했습니다.<br><br>
-            <strong>[매칭 전략]</strong><br>
-            귀하가 선호하는 <strong>'{info['priority']}'</strong> 가치를 최우선으로 고려할 때,
-            일반적인 소개팅보다는 검증된 신원의 <strong>[{tier}]</strong> 그룹 내에서의 매칭이
-            성혼 성공률을 <strong>3.5배</strong> 이상 높일 수 있습니다.<br><br>
-            <strong>[추천 매칭 풀]</strong><br>
-            👉 {match_pool}
+        <div class='ai-insight-box'>
+            <div class='ai-title'>🔍 심층 성향 분석 결과</div>
+            <div style='margin-bottom: 15px;'>{badges_html}</div>
+            <div style='font-size: 0.95rem; line-height: 1.6; color: #333;'>
+                {ai_insights[0] if ai_insights else "입력된 텍스트가 부족하여 심층 분석이 제한적입니다."}<br><br>
+                작성하신 내용의 문맥(Context)을 분석했을 때, 귀하는 <strong>'{info['priority']}'</strong>을(를) 중요시하면서도 
+                내면적으로는 <strong>안정적인 유대감</strong>을 갈망하는 성향이 관찰됩니다.
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        st.markdown(f"""
+        <div style='background-color: #fff; border: 1px solid #eee; padding: 15px; border-radius: 8px;'>
+            <strong style='color: #1a237e;'>💡 최종 매칭 전략</strong><br>
+            일반 매칭보다는 신원이 검증된 <strong>[{tier}]</strong> 그룹 내에서, 
+            귀하의 성향을 이해해 줄 수 있는 <strong>전문직/안정적 직군</strong>과의 매칭이 
+            성혼 확률을 <strong>3.5배</strong> 높일 수 있습니다.
         </div>
         """, unsafe_allow_html=True)
 

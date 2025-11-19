@@ -14,17 +14,18 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# 프리미엄 CSS (고급스러운 서식 & 깔끔한 UI)
+# 프리미엄 CSS (수정본: 텍스트 컬러 강제 지정 & 버튼 확대)
 st.markdown("""
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap');
     
     html, body, [class*="css"] {
         font-family: 'Noto Sans KR', sans-serif;
     }
     
+    /* 메인 배경색 */
     .stApp {
-        background-color: #f8f9fa;
+        background-color: #f0f2f5;
         color: #333;
     }
 
@@ -37,57 +38,90 @@ st.markdown("""
     /* 헤더 스타일 */
     .main-header {
         text-align: center;
-        padding: 40px 0 20px 0;
-        border-bottom: 2px solid #1a237e;
+        padding: 30px 0 30px 0;
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
         margin-bottom: 30px;
     }
     .main-title {
-        font-size: 2.5rem;
-        font-weight: 700;
+        font-size: 2.2rem;
+        font-weight: 900;
         color: #1a237e; /* 딥 네이비 */
         letter-spacing: -1px;
-        margin-bottom: 10px;
+        margin-bottom: 5px;
     }
     .sub-title {
         font-size: 1rem;
-        color: #666;
+        color: #555;
         font-weight: 400;
     }
 
     /* 입력 폼 컨테이너 */
     .form-container {
         background-color: #ffffff;
-        padding: 30px;
-        border-radius: 10px;
+        padding: 40px;
+        border-radius: 15px;
         box-shadow: 0 4px 20px rgba(0,0,0,0.05);
         border: 1px solid #eaeaea;
     }
 
     /* 섹션 타이틀 */
     .section-title {
-        font-size: 1.2rem;
-        font-weight: 700;
-        color: #333;
-        margin-bottom: 20px;
-        border-left: 4px solid #d4af37; /* 골드 */
-        padding-left: 10px;
+        font-size: 1.3rem;
+        font-weight: 800;
+        color: #1a237e;
+        margin-bottom: 25px;
+        border-bottom: 2px solid #1a237e;
+        padding-bottom: 10px;
+        display: inline-block;
     }
 
-    /* 버튼 스타일 */
+    /* ★ 중요 수정: 입력창 라벨 텍스트 색상 강제 변경 (안보임 해결) ★ */
+    .stMarkdown p, .stRadio label, .stSelectbox label, .stTextInput label {
+        color: #333333 !important; /* 진한 회색으로 강제 */
+        font-weight: 600 !important;
+        font-size: 0.95rem !important;
+    }
+    
+    /* 라디오 버튼 텍스트 색상 */
+    div[role="radiogroup"] label p {
+        color: #333333 !important;
+        font-weight: 500 !important;
+    }
+
+    /* 버튼 스타일 대폭 수정 (박스 크기 확대) */
     .stButton > button {
-        background: linear-gradient(90deg, #1a237e, #283593);
-        color: #fff;
+        background: linear-gradient(135deg, #1a237e 0%, #0d47a1 100%);
+        color: #fff !important;
         border: none;
-        padding: 15px 0;
-        font-size: 1.1rem;
-        font-weight: 600;
-        border-radius: 8px;
+        padding: 20px 0 !important; /* 높이 키움 */
+        font-size: 1.3rem !important; /* 글자 키움 */
+        font-weight: 800 !important;
+        border-radius: 12px !important;
         width: 100%;
-        transition: all 0.3s;
+        box-shadow: 0 10px 20px rgba(26, 35, 126, 0.2);
+        transition: all 0.3s ease;
+        margin-top: 20px;
     }
     .stButton > button:hover {
-        background: linear-gradient(90deg, #283593, #1a237e);
-        box-shadow: 0 4px 12px rgba(26, 35, 126, 0.3);
+        transform: translateY(-2px);
+        box-shadow: 0 15px 30px rgba(26, 35, 126, 0.3);
+        background: linear-gradient(135deg, #283593 0%, #1565c0 100%);
+    }
+    
+    /* 인풋 필드 디자인 */
+    .stSelectbox > div > div {
+        background-color: #f8f9fa;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        color: #333;
+    }
+    .stTextInput > div > div > input {
+        background-color: #f8f9fa;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        color: #333;
     }
 
     /* 결과 리포트 스타일 */
@@ -100,35 +134,16 @@ st.markdown("""
         box-shadow: 0 10px 30px rgba(0,0,0,0.05);
     }
 
-    /* 챗봇 메시지 (결과 화면용) */
+    /* 챗봇 메시지 */
     .bot-msg {
-        background-color: #f1f3f5;
-        padding: 15px;
-        border-radius: 10px;
-        margin-bottom: 15px;
-        line-height: 1.6;
-        font-size: 0.95rem;
-    }
-
-    /* 더미 메뉴 버튼 스타일 */
-    .menu-btn {
-        display: block;
-        width: 100%;
-        padding: 12px;
-        margin-bottom: 8px;
-        background-color: #fff;
-        border: 1px solid #ddd;
-        border-radius: 5px;
-        text-align: left;
-        color: #555;
-        font-size: 0.9rem;
-        cursor: pointer;
-        text-decoration: none;
-    }
-    .menu-btn:hover {
         background-color: #f8f9fa;
-        color: #1a237e;
-        border-color: #1a237e;
+        border-left: 4px solid #1a237e;
+        padding: 20px;
+        border-radius: 0 10px 10px 0;
+        margin-bottom: 15px;
+        line-height: 1.7;
+        font-size: 1rem;
+        color: #333;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -137,8 +152,8 @@ st.markdown("""
 # [2. 사이드바 (더미 메뉴)]
 # ==========================================
 with st.sidebar:
-    st.image("https://cdn-icons-png.flaticon.com/512/2438/2438078.png", width=60) # 로고 대용 아이콘
-    st.markdown("### IMD Marriage Info")
+    # 로고 대신 텍스트 로고 사용
+    st.markdown("<h2 style='color:#1a237e; text-align:center;'>IMD 결혼정보</h2>", unsafe_allow_html=True)
     st.markdown("---")
     
     menu_options = [
@@ -151,14 +166,15 @@ with st.sidebar:
     ]
     
     for menu in menu_options:
-        if st.button(menu, use_container_width=True):
+        if st.button(menu, use_container_width=True, key=menu):
             st.toast(f"'{menu}' 서비스는 준비 중입니다.", icon="🚧")
     
     st.markdown("---")
     st.markdown("""
-    <div style='font-size: 0.8rem; color: #888;'>
-        고객센터: 1588-0000<br>
-        운영시간: 09:00 ~ 18:00
+    <div style='font-size: 0.8rem; color: #666; text-align: center;'>
+        <strong>고객센터</strong><br>
+        1588-0000<br>
+        (평일 09:00 ~ 18:00)
     </div>
     """, unsafe_allow_html=True)
 
@@ -191,20 +207,13 @@ if 'user_info' not in st.session_state: st.session_state.user_info = {}
 st.markdown("""
 <div class='main-header'>
     <div class='main-title'>IMD 프리미엄 매칭 진단</div>
-    <div class='sub-title'>빅데이터가 분석하는 귀하의 최적화된 성혼 전략</div>
+    <div class='sub-title'>15만 건의 성혼 데이터가 분석하는 귀하의 <b>결혼 점수</b>와 <b>최적의 상대</b></div>
 </div>
 """, unsafe_allow_html=True)
 
 # --- [페이지 1: 정보 입력 폼] ---
 if st.session_state.page == 'input':
     
-    # 인트로 텍스트 (요청하신 대로 수정됨)
-    st.info("""
-    반갑습니다. IMD 매치메이커 AI입니다. 
-    빅데이터 매칭 알고리즘을 통해 귀하의 '결혼 점수'와 '최적의 배우자 그룹'을 진단합니다.
-    정확한 매칭을 위해 아래 정보를 입력해 주십시오.
-    """)
-
     with st.container():
         st.markdown("<div class='form-container'>", unsafe_allow_html=True)
         
@@ -219,7 +228,7 @@ if st.session_state.page == 'input':
         
         col3, col4 = st.columns(2)
         with col3:
-            birth_year = st.selectbox("생년 *", years, index=30) # 1980년생 쯤을 기본으로
+            birth_year = st.selectbox("생년 *", years, index=35) # 1985년생 쯤을 기본으로
         with col4:
             region = st.selectbox("지역 *", regions)
 
@@ -246,8 +255,8 @@ if st.session_state.page == 'input':
 
         st.markdown("<br><br>", unsafe_allow_html=True)
         
-        # 제출 버튼
-        if st.button("AI 정밀 진단 시작하기"):
+        # 제출 버튼 (크고 아름답게)
+        if st.button("✨ AI 정밀 진단 결과보기"):
             if name and job != "선택해 주세요." and edu != "선택해 주세요." and region != "선택해 주세요.":
                 # 데이터 저장
                 st.session_state.user_info = {
@@ -263,7 +272,7 @@ if st.session_state.page == 'input':
                 st.session_state.page = 'result'
                 st.rerun()
             else:
-                st.error("필수 항목(*)을 모두 입력해 주십시오.")
+                st.error("정확한 진단을 위해 필수 항목(*)을 모두 선택해 주십시오.")
         
         st.markdown("</div>", unsafe_allow_html=True)
 

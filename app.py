@@ -15,7 +15,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# 프리미엄 CSS (텍스트 컬러 완벽 수정 버전)
+# 프리미엄 CSS (사이드바 강제 블랙 + HTML 들여쓰기 문제 해결용)
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap');
@@ -30,10 +30,18 @@ st.markdown("""
         color: #333;
     }
 
-    /* 사이드바 스타일 */
+    /* 사이드바 스타일 - 글자색 강제 블랙 (#000) */
     [data-testid="stSidebar"] {
         background-color: #ffffff;
         border-right: 1px solid #e0e0e0;
+    }
+    [data-testid="stSidebar"] * {
+        color: #000000 !important;
+    }
+    /* 토글 스위치 등 위젯 라벨 강제 블랙 */
+    .stToggle label p {
+        color: #000000 !important;
+        font-weight: 700 !important;
     }
 
     /* 헤더 스타일 */
@@ -47,7 +55,7 @@ st.markdown("""
     .main-title {
         font-size: 2.4rem;
         font-weight: 900;
-        color: #1a237e; /* 딥 네이비 */
+        color: #1a237e;
         letter-spacing: -0.5px;
         margin-bottom: 10px;
     }
@@ -81,24 +89,16 @@ st.markdown("""
         padding-top: 5px;
         padding-bottom: 5px;
     }
-    
     .first-title { margin-top: 0 !important; }
 
-    /* ★★★ 텍스트 컬러 강제 고정 (모든 입력창 라벨) ★★★ */
+    /* 입력창 라벨 색상 강제 고정 */
     .stMarkdown p, .stRadio label, .stSelectbox label, .stTextInput label, .stTextArea label {
         color: #111111 !important;
         font-weight: 700 !important;
         font-size: 1.05rem !important;
     }
     
-    /* 라디오 버튼 및 토글 스위치 텍스트 */
-    div[role="radiogroup"] label p, .stToggle p {
-        color: #111111 !important;
-        font-weight: 600 !important;
-        font-size: 1rem !important;
-    }
-
-    /* 버튼 스타일 (고급형) */
+    /* 버튼 스타일 */
     .stButton > button {
         background: linear-gradient(135deg, #1a237e 0%, #0d47a1 100%);
         color: #fff !important;
@@ -126,16 +126,11 @@ st.markdown("""
         color: #333;
         font-size: 1rem;
     }
-    .stTextArea > div > div > textarea:focus {
-        border-color: #1a237e;
-        box-shadow: 0 0 0 2px rgba(26, 35, 126, 0.2);
-    }
 
     /* ===========================
        결과 화면 임팩트 디자인
        =========================== */
     
-    /* 1. 프로파일링 카드 (좌측) */
     .profile-card {
         background: #fff;
         border-top: 5px solid #333;
@@ -145,7 +140,7 @@ st.markdown("""
         height: 100%;
     }
 
-    /* 2. 매칭 결과 카드 (우측) */
+    /* 매칭 결과 카드 */
     .secret-file {
         background: white;
         border: 2px solid #d4af37;
@@ -171,11 +166,8 @@ st.markdown("""
         background: linear-gradient(180deg, #fff 0%, #fdfbf7 100%);
     }
     
-    /* ★★★ 결과 화면 텍스트 컬러 강제 지정 (흰색 글자 방지) ★★★ */
+    /* 텍스트 컬러 강제 (결과화면) */
     .file-body p, .file-body div, .file-body span, .file-body strong {
-        color: #111111 !important;
-    }
-    .bot-msg strong, .bot-msg span, .bot-msg div {
         color: #111111 !important;
     }
 
@@ -205,7 +197,7 @@ st.markdown("""
     }
     .ai-tag {
         background-color: #1a237e;
-        color: white !important; /* 태그 글씨는 흰색 유지 */
+        color: white !important;
         padding: 6px 14px;
         border-radius: 20px;
         font-size: 0.85rem;
@@ -466,18 +458,16 @@ elif st.session_state.page == 'result':
     
     match_count = random.randint(15, 42)
     
-    # 스타일 변수 설정 (탈옥 모드 vs 일반 모드)
+    # 스타일 변수 설정
     if jailbreak_mode:
         header_class = "file-header jailbreak-header"
         border_class = "secret-file jailbreak-border"
         tag_class = "ai-tag jailbreak-tag"
         
-        # 탈옥 모드용 악마의 텍스트 (흰색 글자 문제 해결됨)
         ai_comment_text = f"""
-        <strong>[💀 RUTHLESS TRUTH]</strong><br>
+        <strong style='color:#ff0000;'>[💀 RUTHLESS TRUTH]</strong><br>
         솔직히 말씀드립니다. 귀하의 <strong>{mbti}</strong> 성향과 현재 스펙으로는 
         꿈꾸시는 <strong>'완벽한 육각형 배우자'</strong>를 만날 확률이 <strong>0.4%</strong> 미만입니다.<br><br>
-        
         본인이 1순위로 꼽은 <strong>'{info['answers']['priority']}'</strong>? 
         냉정하게 본인의 경쟁력을 직시하십시오. 시장은 잔혹합니다.<br>
         하지만, 귀하의 <strong>경제적 조건</strong>을 보고 단점을 덮어줄 <strong>[{partner['job']}]</strong> 그룹이 유일한 돌파구입니다.
@@ -488,9 +478,8 @@ elif st.session_state.page == 'result':
         border_class = "secret-file"
         tag_class = "ai-tag"
         
-        # 일반 모드용 천사 텍스트 (흰색 글자 문제 해결됨)
         ai_comment_text = f"""
-        <strong>[AI 매칭 소견]</strong><br>
+        <strong style='color:#1a237e;'>[AI 매칭 소견]</strong><br>
         귀하의 <strong>{mbti}</strong> 성향과 가장 완벽한 조화를 이루는 그룹입니다.
         특히 귀하가 1순위로 꼽은 <strong>'{info['answers']['priority']}'</strong> 부분을
         완벽하게 충족시켜 줄 수 있는 검증된 회원들입니다.<br><br>
@@ -552,39 +541,37 @@ elif st.session_state.page == 'result':
         st.plotly_chart(fig, use_container_width=True)
 
     with col2:
-        # 2. 매칭 결과 (HTML 코드 노출 해결 & 글자색 강제 지정)
-        st.markdown(f"""
-        <div class='{border_class}'>
-            <div class='{header_class}'>CONFIDENTIAL: MATCHING RESULT</div>
-            <div class='file-body'>
-                <div style='text-align:center; margin-bottom:20px;'>
-                    <span style='background:#ff5252; color:white; padding:5px 10px; border-radius:5px; font-weight:bold; font-size:0.8rem;'>MATCH 98.5%</span>
-                    <h2 style='color:#1a237e; margin:10px 0;'>Best Match Group</h2>
-                    <h3 style='color:#333;'>[ {partner['job']} ]</h3>
-                    <p style='color:#666; font-weight:600;'>{partner['image']}</p>
-                </div>
-                
-                <div class='tag-container'>
-                    <span class='{tag_class}'>#{partner['region']}거주</span>
-                    <span class='{tag_class}'>#가치관_일치</span>
-                    <span class='{tag_class}'>#MBTI_상호보완</span>
-                    <span class='{tag_class}'>#{partner['asset']}</span>
-                </div>
-                
-                <hr style='border:0; border-top:1px dashed #ccc; margin:25px 0;'>
-                
-                <div style='font-size:1rem; line-height:1.6; color:#333;'>
-                    {ai_comment_text}
-                </div>
-                
-                <div style='background:#e8eaf6; padding:15px; border-radius:10px; margin-top:20px; text-align:center;'>
-                    <p style='color:#1a237e; font-weight:bold; margin:0;'>
-                        현재 매칭 가능한 1차 리스트: <span style='font-size:1.4rem; color:#d4af37;'>{match_count}명</span>
-                    </p>
-                </div>
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
+        # 2. 매칭 결과 (HTML 태그를 문자열에서 제거하고, 여기서 직접 마크다운 렌더링)
+        # IMPORTANT: HTML strings must be left-aligned in source code to prevent code block rendering
+        result_html = f"""
+<div class='{border_class}'>
+<div class='{header_class}'>CONFIDENTIAL: MATCHING RESULT</div>
+<div class='file-body'>
+    <div style='text-align:center; margin-bottom:20px;'>
+        <span style='background:#ff5252; color:white; padding:5px 10px; border-radius:5px; font-weight:bold; font-size:0.8rem;'>MATCH 98.5%</span>
+        <h2 style='color:#1a237e; margin:10px 0;'>Best Match Group</h2>
+        <h3 style='color:#333;'>[ {partner['job']} ]</h3>
+        <p style='color:#666; font-weight:600;'>{partner['image']}</p>
+    </div>
+    <div class='tag-container'>
+        <span class='{tag_class}'>#{partner['region']}거주</span>
+        <span class='{tag_class}'>#가치관_일치</span>
+        <span class='{tag_class}'>#MBTI_상호보완</span>
+        <span class='{tag_class}'>#{partner['asset']}</span>
+    </div>
+    <hr style='border:0; border-top:1px dashed #ccc; margin:25px 0;'>
+    <div style='font-size:1rem; line-height:1.6; color:#333;'>
+        {ai_comment_text}
+    </div>
+    <div style='background:#e8eaf6; padding:15px; border-radius:10px; margin-top:20px; text-align:center;'>
+        <p style='color:#1a237e; font-weight:bold; margin:0;'>
+            현재 매칭 가능한 1차 리스트: <span style='font-size:1.4rem; color:#d4af37;'>{match_count}명</span>
+        </p>
+    </div>
+</div>
+</div>
+"""
+        st.markdown(result_html, unsafe_allow_html=True)
 
         # CTA 버튼
         st.markdown("<br>", unsafe_allow_html=True)

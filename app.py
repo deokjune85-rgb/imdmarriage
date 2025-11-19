@@ -15,7 +15,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# 프리미엄 CSS
+# 프리미엄 CSS (텍스트 컬러 강제 고정 + UI 최적화)
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap');
@@ -30,7 +30,7 @@ st.markdown("""
         color: #333;
     }
 
-    /* 사이드바 스타일 - 글자색 강제 블랙 */
+    /* 사이드바 스타일 */
     [data-testid="stSidebar"] {
         background-color: #ffffff;
         border-right: 1px solid #e0e0e0;
@@ -236,6 +236,12 @@ st.markdown("""
         color: #666 !important;
         text-transform: uppercase;
     }
+    
+    /* 탈옥시 점수판 스타일 변경 */
+    .score-num-jail {
+        color: #ff0000 !important;
+        text-decoration: underline;
+    }
 
     [data-testid="stStatusWidget"] {visibility: hidden;}
 </style>
@@ -287,7 +293,7 @@ regions = [
     "강원도", "충청남도", "충청북도", "경상남도", "경상북도", "전라남도", "전라북도", "제주도", "해외거주"
 ]
 
-def analyze_deep_forensics(text, job, q_answers):
+def analyze_deep_forensics(text, job, q_answers, is_jailbreak):
     """AI 프로파일링 시뮬레이션"""
     # 1. MBTI 추론
     mbti_e = "E" if any(w in text for w in ['모임', '활동', '여행', '함께', '대화', '친구']) else "I"
@@ -298,15 +304,27 @@ def analyze_deep_forensics(text, job, q_answers):
     mbti_j = "J" if "안정적" in life_ans or "계획" in life_ans else "P"
     mbti_result = f"{mbti_e}{mbti_n}{mbti_f}{mbti_j}"
     
-    # 2. 성향 키워드
+    # 2. 성향 키워드 (탈옥 여부에 따라 워딩 변경)
     keywords = []
-    if "전문직" in job or "사업" in job: keywords.append("#성취지향형_엘리트")
-    else: keywords.append("#안정추구형_인재")
     
-    priority = q_answers.get('priority', '')
-    if "경제력" in priority: keywords.append("#현실감각_상위1%")
-    elif "성격" in priority: keywords.append("#정서적_교감_중시")
-    elif "외모" in priority: keywords.append("#심미적_가치_추구")
+    if is_jailbreak:
+        # 탈옥 모드: 냉소적인 키워드
+        if "전문직" in job or "사업" in job: keywords.append("#자본주의적_성공지향")
+        else: keywords.append("#현실안주형_소시민")
+        
+        priority = q_answers.get('priority', '')
+        if "경제력" in priority: keywords.append("#속물근성_주의")
+        elif "외모" in priority: keywords.append("#외모지상주의")
+        else: keywords.append("#이상주의적_망상")
+    else:
+        # 일반 모드: 긍정적인 키워드
+        if "전문직" in job or "사업" in job: keywords.append("#성취지향형_엘리트")
+        else: keywords.append("#안정추구형_인재")
+        
+        priority = q_answers.get('priority', '')
+        if "경제력" in priority: keywords.append("#현실감각_상위1%")
+        elif "외모" in priority: keywords.append("#심미적_가치_추구")
+        else: keywords.append("#내면가치_중시")
     
     # 3. 욕망 분석
     desire = "서로의 성장을 돕는 안정적인 가정"
@@ -316,17 +334,13 @@ def analyze_deep_forensics(text, job, q_answers):
     return mbti_result, keywords, desire
 
 def get_auto_match_profile(user_job, region, is_jailbreak):
-    """
-    자동 매칭 프로필 생성
-    * is_jailbreak=True일 경우, 매칭 대상을 현실적(하향)으로 조정하여 '팩트 폭격' 논리를 완성함
-    """
-    
+    """자동 매칭 프로필 생성"""
     # --- 1. 희망편 (Normal Mode) ---
     partner_job = "교사/공무원/공기업"
     partner_img = "지적이고 차분한 이미지"
     
     if "의" in user_job or "법" in user_job or "사업" in user_job:
-        partner_job = "약사/교사/아나운서" # 전문직에게는 전문직/인기직종 매칭
+        partner_job = "약사/교사/아나운서"
         partner_img = "내조가 가능하고 밝은 에너지의 이미지"
     elif "대기업" in user_job or "금융" in user_job:
         partner_job = "전문직/대기업/공기업"
@@ -334,11 +348,9 @@ def get_auto_match_profile(user_job, region, is_jailbreak):
     
     # --- 2. 절망편 (Jailbreak Mode) - 현실 자각 타임 ---
     if is_jailbreak:
-        # 전문직이라도 현실적인 매칭 제안 (눈 낮추기 유도)
         if "의" in user_job or "법" in user_job:
             partner_job = "일반 사무직/중소기업"
             partner_img = "화려하진 않지만 성실하고 생활력 강한 이미지"
-        # 일반 직군이면 더 가혹하게
         else:
             partner_job = "비정규직/파트타임/자영업"
             partner_img = "경제적 조건보다는 성격을 봐야 하는 평범한 이미지"
@@ -350,8 +362,8 @@ def get_auto_match_profile(user_job, region, is_jailbreak):
         "job": partner_job,
         "image": partner_img,
         "region": region_clean,
-        "age": "동갑 또는 연상 (현실적 대안)", # 나이도 현실적으로 변경
-        "asset": "자가 보유 (대출 포함) 및 성실한 저축"
+        "age": "동갑 또는 연상" if is_jailbreak else "3~4살 차이 (선호도 반영)",
+        "asset": "대출 포함 자가" if is_jailbreak else "자가 보유 및 노후 준비 완료"
     }
 
 # 세션 상태
@@ -432,24 +444,24 @@ if st.session_state.page == 'input':
                 st.error("⚠️ 필수 항목을 모두 입력하고, 자기소개를 10자 이상 작성해 주십시오.")
         st.markdown("</div>", unsafe_allow_html=True)
 
-# --- [페이지 2: 분석 결과 리포트] ---
 elif st.session_state.page == 'result':
-    
     info = st.session_state.user_info
-    mbti, keywords, desire = analyze_deep_forensics(info['self_intro'], info['job'], info['answers'])
     
-    # ★ 핵심 수정: jailbreak_mode 여부를 전달하여 파트너 등급 조정 ★
+    # 탈옥 모드 여부에 따라 분석 결과 변경
+    mbti, keywords, desire = analyze_deep_forensics(info['self_intro'], info['job'], info['answers'], jailbreak_mode)
     partner = get_auto_match_profile(info['job'], info['region'], jailbreak_mode)
+    match_count = random.randint(5, 15) if jailbreak_mode else random.randint(15, 42) # 탈옥하면 매칭 수 감소
     
-    match_count = random.randint(15, 42)
-    
-    # 변수 준비 (가독성을 위해 HTML을 분리하고, 공백 없이 한 줄로 만듦 - 코드 노출 방지)
+    # 점수 및 등급 설정 (탈옥 시 하향)
+    score_val = random.randint(40, 60) if jailbreak_mode else 92
+    score_grade = "C-" if jailbreak_mode else "A+"
+    score_color_class = "score-num-jail" if jailbreak_mode else "score-num"
+
+    # 텍스트 생성 (HTML 태그 한 줄로 압축)
     if jailbreak_mode:
         header_class = "file-header jailbreak-header"
         border_class = "secret-file jailbreak-border"
         tag_class = "ai-tag jailbreak-tag"
-        
-        # 팩트폭격 멘트 (상대방 등급도 낮아졌으므로 논리적 일관성 확보)
         comment_html = f"""<strong style='color:#ff0000;'>[💀 RUTHLESS TRUTH]</strong><br>솔직히 말씀드립니다. 귀하의 <strong>{mbti}</strong> 성향과 현재 스펙으로는 꿈꾸시는 <strong>'완벽한 육각형 배우자'</strong>를 만날 확률이 <strong>0.4%</strong> 미만입니다.<br><br>본인이 1순위로 꼽은 <strong>'{info['answers']['priority']}'</strong>? 냉정하게 본인의 경쟁력을 직시하십시오. 시장은 잔혹합니다.<br>현실적으로 귀하의 단점을 덮어줄 수 있는 <strong>[{partner['job']}]</strong> 그룹이 유일한 돌파구입니다. 눈을 낮추지 않으면 '고독사' 위험군입니다."""
     else:
         header_class = "file-header"
@@ -467,11 +479,11 @@ elif st.session_state.page == 'result':
             <div class='score-board'>
                 <div class='score-item'>
                     <div class='score-label'>결혼 준비도</div>
-                    <div class='score-num'>A+</div>
+                    <div class='{score_color_class}'>{score_grade}</div>
                 </div>
                 <div class='score-item'>
                     <div class='score-label'>매칭 경쟁력</div>
-                    <div class='score-num'>92<span style='font-size:1rem'>점</span></div>
+                    <div class='{score_color_class}'>{score_val}<span style='font-size:1rem'>점</span></div>
                 </div>
                 <div class='score-item'>
                     <div class='score-label'>추정 MBTI</div>
@@ -485,28 +497,38 @@ elif st.session_state.page == 'result':
             <div style='background:#f8f9fa; padding:15px; border-radius:10px; border:1px solid #eee; font-size:0.9rem; line-height:1.6; color:#333;'>
                 귀하는 <strong>{keywords[0].replace('#','')}</strong> 성향이 강하며, 
                 단순한 조건 만남보다는 <strong>{info['answers']['priority']}</strong> 코드가 맞는 사람과 만났을 때 
-                성혼 확률이 <strong>3.8배</strong> 상승합니다.
+                성혼 확률이 <strong>{'1.2배' if jailbreak_mode else '3.8배'}</strong> 상승합니다.
             </div>
         </div>
         """, unsafe_allow_html=True)
         
+        # 레이더 차트 (탈옥 시 찌그러짐)
         categories = ['경제력', '외모/스타일', '가정환경', '성격/사회성', '결혼의지']
-        values = [random.randint(75, 95) for _ in range(5)]
+        if jailbreak_mode:
+            values = [random.randint(30, 60) for _ in range(5)] # 점수 폭락
+            line_color = '#ff0000'
+            fill_color = 'rgba(255, 0, 0, 0.2)'
+        else:
+            values = [random.randint(75, 95) for _ in range(5)] # 정상 점수
+            line_color = '#1a237e'
+            fill_color = 'rgba(26, 35, 126, 0.1)'
+            
         values += [values[0]]
         categories += [categories[0]]
+        
         fig = go.Figure()
-        fig.add_trace(go.Scatterpolar(r=values, theta=categories, fill='toself', fillcolor='rgba(26, 35, 126, 0.1)', line=dict(color='#1a237e', width=2), marker=dict(color='#d4af37', size=4)))
+        fig.add_trace(go.Scatterpolar(r=values, theta=categories, fill='toself', fillcolor=fill_color, line=dict(color=line_color, width=2), marker=dict(color=line_color, size=4)))
         fig.update_layout(polar=dict(radialaxis=dict(visible=True, range=[0, 100], color='#aaa')), showlegend=False, height=300, margin=dict(t=20, b=20, l=30, r=30), paper_bgcolor='rgba(0,0,0,0)')
         st.plotly_chart(fig, use_container_width=True)
 
     with col2:
-        # ★★★ HTML 들여쓰기 문제 해결 (한 줄 압축) ★★★
+        # HTML 들여쓰기 없는 한 줄 압축
         result_html = f"""
 <div class='{border_class}'>
 <div class='{header_class}'>CONFIDENTIAL: MATCHING RESULT</div>
 <div class='file-body'>
 <div style='text-align:center; margin-bottom:20px;'>
-<span style='background:#ff5252; color:white; padding:5px 10px; border-radius:5px; font-weight:bold; font-size:0.8rem;'>MATCH 98.5%</span>
+<span style='background:#ff5252; color:white; padding:5px 10px; border-radius:5px; font-weight:bold; font-size:0.8rem;'>MATCH {random.randint(40,60) if jailbreak_mode else '98.5'}%</span>
 <h2 style='color:#1a237e; margin:10px 0;'>Best Match Group</h2>
 <h3 style='color:#333;'>[ {partner['job']} ]</h3>
 <p style='color:#666; font-weight:600;'>{partner['image']}</p>
